@@ -51,11 +51,27 @@ resource "aws_security_group" "eks_node_group_sg" {
   }
 
   ingress {
+    description = "Allow HTTP from outside"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [local.cidr_ipv4]
+  }
+
+  ingress {
     description = "Allow Kubelet API communication"
     from_port   = 10250
     to_port     = 10250
     protocol    = "tcp"
     cidr_blocks =  ["180.0.0.0/16"]
+  }
+
+  ingress {
+    description = "AllowNODE port communication"
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks =  [local.cidr_ipv4]
   }
 
   # Outbound Rules

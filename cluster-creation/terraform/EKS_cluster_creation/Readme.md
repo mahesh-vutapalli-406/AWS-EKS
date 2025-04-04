@@ -1,0 +1,1 @@
+aws eks update-kubeconfig --name eks-cluster-tf --region us-east-1 --profile eks
