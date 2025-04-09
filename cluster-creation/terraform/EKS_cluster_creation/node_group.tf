@@ -1,8 +1,19 @@
 
 resource "aws_launch_template" "eks_node_lt" {
   name_prefix   = "eks-node-lt"
-  instance_type = "t3.medium" # or whatever instance type you're using
+  instance_type = "m5.large" # or whatever instance type you're using
+  key_name      = aws_key_pair.eks-ssh.key_name
+  # cpu_options {
+  #   core_count       = 4
+  #   threads_per_core = 2
+  # }
+  block_device_mappings {
+    device_name = "/dev/xvda"
 
+    ebs {
+      volume_size = 64
+    }
+  }
   vpc_security_group_ids = [
     aws_security_group.eks_node_group_sg.id
   ]
@@ -14,19 +25,19 @@ resource "aws_eks_node_group" "node" {
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = [module.subnet-1.subnetid_public1, module.subnet-2.subnetid_public1]
   #instance_types  = ["t3.medium"]
-  remote_access {
-    ec2_ssh_key               = aws_key_pair.eks-ssh.key_name
-    source_security_group_ids = [aws_security_group.eks_node_group_sg.id]
-  }
+  # remote_access {
+  #   ec2_ssh_key               = aws_key_pair.eks-ssh.key_name
+  #   source_security_group_ids = [aws_security_group.eks_node_group_sg.id]
+  # }
   launch_template {
     id      = aws_launch_template.eks_node_lt.id
     version = "$Latest"
   }
   // Configure scaling options for the node group
   scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
+    desired_size = 2
+    max_size     = 4
+    min_size     = 2
   }
   update_config {
     max_unavailable = 1
